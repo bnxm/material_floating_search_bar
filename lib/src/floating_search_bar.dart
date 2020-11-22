@@ -500,9 +500,9 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
       duration: const Duration(milliseconds: 0),
     );
 
-    Tween(begin: 1.0, end: 0.0)
+    _translateOpacityAnimation = Tween(begin: 1.0, end: 0.0)
       .animate(_translateOpacityController);
-    _translateOpacityAnimation = _translateOpacityController.drive(CurveTween(curve: Curves.fastLinearToSlowEaseIn));
+    // _translateOpacityAnimation = CurvedAnimation(parent: _translateOpacityController, curve: Curves.fastLinearToSlowEaseIn);
 
     transition = widget.transition ?? SlideFadeFloatingSearchBarTransition();
 
