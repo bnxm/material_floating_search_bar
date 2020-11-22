@@ -273,6 +273,8 @@ class FloatingSearchBar extends ImplicitlyAnimatedWidget {
   ///    child.
   final FloatingSearchBarTransition transition;
 
+  final bool fadeOffscreen;
+
   /// The builder for the body of this `FloatingSearchBar`.
   ///
   /// Usually, a list of items. Note that unless [isScrollControlled]
@@ -379,6 +381,7 @@ class FloatingSearchBar extends ImplicitlyAnimatedWidget {
     this.onSubmitted,
     this.onFocusChanged,
     this.transition,
+    this.fadeOffscreen,
     @required this.builder,
     this.controller,
     this.textInputAction = TextInputAction.search,
@@ -412,6 +415,9 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
 
   AnimationController _translateController;
   CurvedAnimation _translateAnimation;
+
+  AnimationController _translateOpacityController;
+  Animation<double> _translateOpacityAnimation;
 
   FloatingSearchBarTransition transition;
   ScrollController _scrollController;
@@ -488,6 +494,15 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
       parent: _translateController,
       curve: Curves.easeInOut,
     );
+
+    _translateOpacityController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 0),
+    );
+
+    Tween(begin: 1.0, end: 0.0)
+      .animate(_translateOpacityController);
+    _translateOpacityAnimation = _translateOpacityController.drive(CurveTween(curve: Curves.fastLinearToSlowEaseIn));
 
     transition = widget.transition ?? SlideFadeFloatingSearchBarTransition();
 
@@ -590,6 +605,9 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
         _translateController.value += delta / (height + _resolve(margins).top);
         _lastPixel = pixel;
       }
+
+      if (widget.fadeOffscreen)
+        _translateOpacityController.animateTo(_translateController.value);
     }
 
     return false;
@@ -648,32 +666,38 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
         final padding = _resolve(transition.lerpPadding());
         final borderRadius = transition.lerpBorderRadius();
 
-        final container = Semantics(
-          hidden: !isVisible,
-          focusable: true,
-          focused: isOpen,
-          child: Padding(
-            padding: transition.lerpMargin(),
-            child: Material(
-              elevation: transition.lerpElevation(),
-              shadowColor: style.shadowColor,
-              borderRadius: borderRadius,
-              child: Container(
-                height: transition.lerpHeight(),
-                padding:
-                    EdgeInsets.only(top: padding.top, bottom: padding.bottom),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: transition.lerpBackgroundColor(),
-                  border: style.border != null
-                      ? Border.fromBorderSide(style.border)
-                      : null,
+        final container = AnimatedBuilder(
+          animation: _translateOpacityController,
+          builder: (context, _) => Opacity(
+            opacity: _translateOpacityAnimation.value,
+            child: Semantics(
+              hidden: !isVisible,
+              focusable: true,
+              focused: isOpen,
+              child: Padding(
+                padding: transition.lerpMargin(),
+                child: Material(
+                  elevation: transition.lerpElevation(),
+                  shadowColor: style.shadowColor,
                   borderRadius: borderRadius,
-                ),
-                constraints: boxConstraints,
-                child: ClipRRect(
-                  borderRadius: borderRadius,
-                  child: _buildInnerBar(),
+                  child: Container(
+                    height: transition.lerpHeight(),
+                    padding:
+                        EdgeInsets.only(top: padding.top, bottom: padding.bottom),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: transition.lerpBackgroundColor(),
+                      border: style.border != null
+                          ? Border.fromBorderSide(style.border)
+                          : null,
+                      borderRadius: borderRadius,
+                    ),
+                    constraints: boxConstraints,
+                    child: ClipRRect(
+                      borderRadius: borderRadius,
+                      child: _buildInnerBar(),
+                    ),
+                  ),
                 ),
               ),
             ),
