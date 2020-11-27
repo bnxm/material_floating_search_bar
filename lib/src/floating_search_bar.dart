@@ -500,9 +500,7 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
       duration: const Duration(milliseconds: 0),
     );
 
-    _translateOpacityAnimation = Tween(begin: 1.0, end: 0.0)
-      .animate(_translateOpacityController);
-    // _translateOpacityAnimation = CurvedAnimation(parent: _translateOpacityController, curve: Curves.fastLinearToSlowEaseIn);
+    _translateOpacityAnimation = CurvedAnimation(parent: _translateController, curve: Curves.fastOutSlowIn);
 
     transition = widget.transition ?? SlideFadeFloatingSearchBarTransition();
 
@@ -605,9 +603,6 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
         _translateController.value += delta / (height + _resolve(margins).top);
         _lastPixel = pixel;
       }
-
-      if (widget.fadeOffscreen)
-        _translateOpacityController.animateTo(_translateController.value);
     }
 
     return false;
@@ -667,9 +662,9 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
         final borderRadius = transition.lerpBorderRadius();
 
         final container = AnimatedBuilder(
-          animation: _translateOpacityController,
+          animation: _translateController,
           builder: (context, _) => Opacity(
-            opacity: _translateOpacityAnimation.value,
+            opacity: 1 - _translateOpacityAnimation.value,
             child: Semantics(
               hidden: !isVisible,
               focusable: true,
