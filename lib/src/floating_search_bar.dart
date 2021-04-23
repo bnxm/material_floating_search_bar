@@ -901,6 +901,9 @@ class FloatingSearchBarController {
   /// not visible.
   bool get isHidden => _searchBarState?.isVisible == false;
 
+  /// set the focus on the [FloatingSearchBar] 
+  void focus() => _appBarState?.focus();
+
   /// Disposes this controller.
   void dispose() {
     _searchBarState = null;
