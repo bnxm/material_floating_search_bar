@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   meta: ^1.1.8
+  flutter_hooks: ^0.13.2
 
 dev_dependencies:
   flutter_test:
