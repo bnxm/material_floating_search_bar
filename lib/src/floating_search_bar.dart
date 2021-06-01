@@ -163,6 +163,13 @@ class FloatingSearchBar extends ImplicitlyAnimatedWidget {
   /// {@endtemplate}
   final bool automaticallyImplyBackButton;
 
+  /// {@template floating_search_bar.automaticallyImplyBackdrop}
+  /// Whether to automatically build backdrop besides the search bar
+  ///
+  /// When not specified, defaults to `true`.
+  /// {@endtemplate}
+  final bool automaticallyImplyBackdrop;
+
   /// Whether the `FloatingSearchBar` should be closed when
   /// the backdrop was tapped.
   ///
@@ -366,6 +373,7 @@ class FloatingSearchBar extends ImplicitlyAnimatedWidget {
     this.clearQueryOnClose = true,
     this.automaticallyImplyDrawerHamburger = true,
     this.automaticallyImplyBackButton = true,
+    this.automaticallyImplyBackdrop = true,
     this.closeOnBackdropTap = true,
     this.progress = false,
     this.transitionDuration = const Duration(milliseconds: 500),
@@ -581,6 +589,12 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
     transition.searchBar = this;
     body = widget.builder(context, animation);
 
+    final List<Widget> stackWidgets = [];
+    if (widget.automaticallyImplyBackdrop) {
+      stackWidgets.add(_buildBackdrop());
+    }
+    stackWidgets.add(_buildSearchBar());
+
     final searchBar = SizedBox.expand(
       child: WillPopScope(
         onWillPop: _onPop,
@@ -590,12 +604,7 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
             valueListenable: rebuilder,
             builder: (context, __, _) => AnimatedBuilder(
               animation: animation,
-              builder: (context, _) => Stack(
-                children: <Widget>[
-                  _buildBackdrop(),
-                  _buildSearchBar(),
-                ],
-              ),
+              builder: (context, _) => Stack(children: stackWidgets),
             ),
           ),
         ),
@@ -666,7 +675,7 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
       curve: widget.transitionCurve,
       alignment: Alignment(
           isOpen ? style.openAxisAlignment : style.axisAlignment, -1.0),
-      child: transition.isBodyInsideSearchBar
+      child: !widget.automaticallyImplyBackdrop || transition.isBodyInsideSearchBar
           ? bar
           : Column(
               children: <Widget>[
