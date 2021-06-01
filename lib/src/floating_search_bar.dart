@@ -675,7 +675,7 @@ class FloatingSearchBarState extends ImplicitlyAnimatedWidgetState<
       curve: widget.transitionCurve,
       alignment: Alignment(
           isOpen ? style.openAxisAlignment : style.axisAlignment, -1.0),
-      child: transition.isBodyInsideSearchBar
+      child: !widget.automaticallyImplyBackdrop || transition.isBodyInsideSearchBar
           ? bar
           : Column(
               children: <Widget>[
