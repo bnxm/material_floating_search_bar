@@ -870,6 +870,9 @@ class FloatingSearchBarController {
   /// Visually hides the [FloatingSearchBar].
   void hide() => _searchBarState?.hide();
 
+  /// Unfocus the search bar
+  void unfocus() => _searchBarState?.isOpen = false;
+    
   /// Sets the query of the input of the [FloatingSearchBar].
   set query(String query) {
     if (_appBarState == null) {
